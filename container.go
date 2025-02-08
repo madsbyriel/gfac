@@ -1,4 +1,4 @@
-package main
+package gfac
 
 import (
 	"fmt"
