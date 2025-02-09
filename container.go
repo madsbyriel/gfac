@@ -42,7 +42,6 @@ func (c *container) Register(source any, target any) {
 
     if !sourceValue.Type().Implements(targetType) {
         panic(fmt.Sprintf("%v does not implement %v", sourceValue.Type(), targetType))
-
     }
 
     m := sourceValue.MethodByName("Init")
