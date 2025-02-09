@@ -5,19 +5,32 @@ import (
 	"reflect"
 )
 
-type Container struct {
+// Exported
+func NewLifetime() ILifetime {
+    return (&container{}).Init().Resolve((*ILifetime)(nil)).(ILifetime)
+}
+
+type container struct {
     ctors map[reflect.Type]reflect.Value
     objects map[reflect.Type]reflect.Value
 }
 
-func (*Container) Init() *Container {
-    return &Container{
+func (*container) Init() *container {
+    cont := &container{
         ctors: make(map[reflect.Type]reflect.Value),
         objects: make(map[reflect.Type]reflect.Value),
     }
+    cont.Register(&container{}, (*ILifetime)(nil))
+
+    return cont
 }
 
-func (c *Container) Register(source any, target any) {
+type ILifetime interface {
+    Register(source any, target any)
+    Resolve(target any) any
+}
+
+func (c *container) Register(source any, target any) {
     sourceValue := reflect.ValueOf(source)
     targetType := reflect.TypeOf(target).Elem()
 
@@ -40,11 +53,11 @@ func (c *Container) Register(source any, target any) {
     c.ctors[targetType] = m;
 }
 
-func (c *Container) Resolve(target any) any {
+func (c *container) Resolve(target any) any {
     return c.getOrCreate(reflect.TypeOf(target).Elem()).Interface()
 }
 
-func (c *Container) getOrCreate(t reflect.Type) reflect.Value {
+func (c *container) getOrCreate(t reflect.Type) reflect.Value {
     ctor, found := c.ctors[t];
 
     if !found {
@@ -62,7 +75,7 @@ func (c *Container) getOrCreate(t reflect.Type) reflect.Value {
     return obj
 }
 
-func (c *Container) constructObject(ctor reflect.Value) reflect.Value {
+func (c *container) constructObject(ctor reflect.Value) reflect.Value {
     ctorType := ctor.Type()
     numParams := ctorType.NumIn()
     params := make([]reflect.Value, numParams)

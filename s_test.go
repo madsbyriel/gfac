@@ -5,70 +5,71 @@ import (
 )
 
 func TestMain(t *testing.T) {
-    c := (&Container{}).Init()
+	c := NewLifetime()
 
-    c.Register(&SomeStruct{}, (*DoOfSomething)(nil))
-    c.Register(&AStruct{}, (*ASomething)(nil))
-    c.Register(&BStruct{}, (*BSomething)(nil))
-    c.Register(&CStruct{}, (*CSomething)(nil))
+    _ = c.Resolve((*ILifetime)(nil)).(ILifetime)
 
-    doer := c.Resolve((*DoOfSomething)(nil)).(DoOfSomething)
+	c.Register(&some_struct{}, (*doOfSomething)(nil))
+	c.Register(&a_struct{}, (*a_something)(nil))
+	c.Register(&b_struct{}, (*b_something)(nil))
+	c.Register(&c_struct{}, (*c_something)(nil))
 
-    if doer.DoSomething() != 42069 {
-        t.Fail()
-    }
+	doer := c.Resolve((*doOfSomething)(nil)).(doOfSomething)
+	if doer.DoSomething() != 42069 {
+		t.Fail()
+	}
 }
 
-type SomeStruct struct {
-    a ASomething
-    b BSomething
-    c CSomething
+type some_struct struct {
+	a a_something
+	b b_something
+	c c_something
 }
 
-func (*SomeStruct) Init(a ASomething, b BSomething, c CSomething) *SomeStruct {
-    return &SomeStruct{
-        a,
-        b,
-        c,
-    }
+func (*some_struct) Init(a a_something, b b_something, c c_something) *some_struct {
+	return &some_struct{
+		a,
+		b,
+		c,
+	}
 }
 
-func (a *SomeStruct) DoSomething() int {
-    return a.a.ASomething() + a.b.BSomething() * 10 + a.c.CSomething()
+func (a *some_struct) DoSomething() int {
+	return a.a.ASomething() + a.b.BSomething()*10 + a.c.CSomething()
 }
 
-type DoOfSomething interface {
-    DoSomething() int
+type doOfSomething interface {
+	DoSomething() int
 }
 
-type AStruct struct {}
-type BStruct struct {}
-type CStruct struct {}
+type a_struct struct{}
+type b_struct struct{}
+type c_struct struct{}
 
-func (a *AStruct) Init(b BSomething, c CSomething) *AStruct {
-    return &AStruct{}
+func (a *a_struct) Init(b b_something, c c_something) *a_struct {
+	return &a_struct{}
 }
 
-func (a *BStruct) Init(c CSomething) *BStruct {
-    return &BStruct{}
+func (a *b_struct) Init(c c_something) *b_struct {
+	return &b_struct{}
 }
 
-func (a *CStruct) Init() *CStruct {
-    return &CStruct{}
+func (a *c_struct) Init() *c_struct {
+	return &c_struct{}
 }
 
-func (a *AStruct) ASomething() int {
-    return 8 * 8 + 5
+func (a *a_struct) ASomething() int {
+	return 8*8 + 5
 }
 
-func (a *BStruct) BSomething() int {
-    return 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 10
+func (a *b_struct) BSomething() int {
+	return 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 10
 }
 
-func (a *CStruct) CSomething() int {
-    return 41 * 4 * 100
+func (a *c_struct) CSomething() int {
+	return 41 * 4 * 100
 }
 
-type ASomething interface { ASomething() int }
-type BSomething interface { BSomething() int }
-type CSomething interface { CSomething() int }
+type a_something interface{ ASomething() int }
+type b_something interface{ BSomething() int }
+type c_something interface{ CSomething() int }
